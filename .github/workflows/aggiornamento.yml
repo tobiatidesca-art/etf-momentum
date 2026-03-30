@@ -35,10 +35,6 @@ jobs:
       - name: Esegui backtest
         run: python backtest_reale.py
 
-      - name: Inietta token nei bottoni HTML
-        run: |
-          sed -i "s|__GH_PAT__|${{ secrets.GH_PAT }}|g" docs/index.html
-
       - name: Invia Telegram
         if: ${{ github.event_name == 'schedule' || inputs.invia_telegram == true || inputs.invia_telegram == 'true' }}
         run: python telegram_send.py

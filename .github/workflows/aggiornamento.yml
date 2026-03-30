@@ -36,7 +36,7 @@ jobs:
         run: python backtest_reale.py
 
       - name: Invia Telegram
-        if: ${{ github.event_name == 'schedule' || inputs.invia_telegram == 'true' }}
+        if: ${{ github.event_name == 'schedule' || inputs.invia_telegram == true || inputs.invia_telegram == 'true' }}
         run: python telegram_send.py
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}

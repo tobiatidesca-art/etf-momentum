@@ -1586,7 +1586,7 @@ def genera_html(risultati, stats, cap_labs, cap_vals, sp500_vals, drawdown_vals,
     )
 
     import os as _os; _os.makedirs('docs', exist_ok=True)
-    output_path = _os.path.join('docs', 'backtest_report.html')
+    output_path = _os.path.join('docs', 'index.html')
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(html)
     print(f"Report HTML salvato: {output_path}")

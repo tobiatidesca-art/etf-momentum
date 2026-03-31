@@ -2,7 +2,7 @@ name: Aggiornamento ETF Momentum
 
 on:
   schedule:
-    - cron: '37 7 * * *'   # TEST TEMPORANEO - da riportare a '0 5 * * *'
+    - cron: '58 7 * * *'   # TEST TEMPORANEO - da riportare a '0 5 * * *'
   workflow_dispatch:
     inputs:
       invia_telegram:

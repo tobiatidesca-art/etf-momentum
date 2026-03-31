@@ -2,8 +2,7 @@ name: Aggiornamento ETF Momentum
 
 on:
   schedule:
-    - cron: '0 5 * * *'   # 06:00 CET (inverno, UTC+1)
-    - cron: '0 4 * * *'   # 06:00 CEST (estate, UTC+2)
+    - cron: '0 5 * * *'   # ~06:00 ora italiana (con possibile ritardo GitHub)
   workflow_dispatch:
     inputs:
       invia_telegram:
@@ -16,27 +15,7 @@ permissions:
   contents: write
 
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    outputs:
-      esegui: ${{ steps.ora.outputs.esegui }}
-    steps:
-      - name: Controlla ora Roma
-        id: ora
-        run: |
-          pip install pytz -q
-          python3 -c "
-          from datetime import datetime
-          import pytz
-          ora = datetime.now(pytz.timezone('Europe/Rome')).hour
-          print(f'Ora a Roma: {ora}:00')
-          with open('$GITHUB_OUTPUT', 'a') as f:
-              f.write('esegui=true\n' if ora == 6 else 'esegui=false\n')
-          "
-
   aggiorna:
-    needs: check
-    if: needs.check.outputs.esegui == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:

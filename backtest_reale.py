@@ -42,6 +42,26 @@ ETF_UNIVERSE = {
     'XLE':  ['XOM', 'CVX', 'COP',  'EOG',  'SLB', 'MPC',  'PSX',  'VLO',  'HAL'],
 }
 
+# ── ISIN per tutti i titoli usati ──────────────────────────────────────────────
+ISIN_MAP = {
+    'NVDA':  'US67066G1040', 'TSM':   'US8740391003', 'AVGO':  'US11135F1012',
+    'ASML':  'US0486239060', 'AMD':   'US0079031078', 'QCOM':  'US7475251036',
+    'INTC':  'US4581401001', 'MU':    'US5951121038', 'AMAT':  'US0382220671',
+    'LRCX':  'US5128071082', 'TXN':   'US8825081040', 'KLAC':  'US4824801009',
+    'ON':    'US6821891057', 'MSFT':  'US5949181045', 'AAPL':  'US0378331005',
+    'CRM':   'US79466L3024', 'ORCL':  'US68389X1054', 'ACN':   'IE00B4BNMY34',
+    'CSCO':  'US17275R1023', 'IBM':   'US4592001014', 'ADBE':  'US00724F1012',
+    'AMZN':  'US0231351067', 'META':  'US30303M1027', 'GOOGL': 'US02079K3059',
+    'TSLA':  'US88160R1014', 'COST':  'US22160K1051', 'NFLX':  'US64110L1061',
+    'RTX':   'US75513E1010', 'LMT':   'US5398301094', 'BA':    'US0970231058',
+    'NOC':   'US6668071029', 'GD':    'US3695501086', 'LHX':   'US5024131071',
+    'HII':   'US4045421078', 'TDG':   'US8936561002', 'AXON':  'US05464C1018',
+    'CACI':  'US1271906482', 'XOM':   'US30231G1022', 'CVX':   'US1667641005',
+    'COP':   'US20825C1045', 'EOG':   'US26875P1012', 'SLB':   'AN8068571086',
+    'MPC':   'US56585A1025', 'PSX':   'US7185461040', 'VLO':   'US91913Y1001',
+    'HAL':   'US4062161017',
+}
+
 # ── Download ──────────────────────────────────────────────────────────────────
 def download_all_data():
     all_tickers = set(['SPY'])
@@ -675,6 +695,7 @@ def genera_html(risultati, stats, cap_labs, cap_vals, sp500_vals, drawdown_vals,
     tc_js         = json.dumps(ticker_charts)
     costo_js      = json.dumps(COSTO_INGRESSO_PCT)
     mesi_raw_js_s = json.dumps(mesi_raw_js if mesi_raw_js is not None else [])
+    isin_map_js   = json.dumps(ISIN_MAP)
     sp500_norm_js_s = json.dumps(sp500_norm_js)
     pos_raw_js_s  = json.dumps(pos_raw_js)
     data_fine_lab = cap_labs[-1] if cap_labs else ''
@@ -923,6 +944,7 @@ def genera_html(risultati, stats, cap_labs, cap_vals, sp500_vals, drawdown_vals,
         f'const TICKER_CHARTS = {tc_js};\n'
         f'const COSTO_PCT     = {costo_js};\n'
         f'const MESI_RAW      = {mesi_raw_js_s};\n'
+        f'const ISIN_MAP      = {isin_map_js};\n'
         f'const SP500_NORM    = {sp500_norm_js_s};\n'
         f'const POS_RAW       = {pos_raw_js_s};\n'
         f'const PARAMS_DEFAULT = {{n: {N_TITOLI}, cap: {CAPITALE_PER_TITOLO:.0f}, costo: {COSTO_INGRESSO_PCT}}};\n'
@@ -1274,14 +1296,17 @@ def genera_html(risultati, stats, cap_labs, cap_vals, sp500_vals, drawdown_vals,
         '  let badges = pa.stocks.map(s => {\n'
         '    const c = s.ret_netto>=0?"#00c897":"#ff4d6d";\n'
         '    const key = `${s.ticker}-${pa.data_acquisto.slice(0,7)}`;\n'
-        '    return `<span class="tbadge" onclick="openTickerChart(\'${key}\')" style="border:1px solid ${c};cursor:pointer">\n'
-        '      ${s.ticker} <span style="color:${c}">${s.ret_netto>=0?"+":""}${s.ret_netto}%</span>\n'
+        '    const isin = ISIN_MAP[s.ticker]||"";\n'
+        '    return `<span class="tbadge" onclick="openTickerChart(\'${key}\')" style="border:1px solid ${c};cursor:pointer" title="${isin}">\n'
+        '      ${s.ticker} <span style="color:${c}">${s.ret_netto>=0?"+":""}${s.ret_netto}%</span>'
+        '<a href="https://finance.yahoo.com/chart/${s.ticker}" target="_blank" onclick="event.stopPropagation()" style="color:#58a6ff;font-size:1.1rem;font-weight:700;text-decoration:none;margin-left:5px;vertical-align:middle" title="Yahoo Finance">&#x2197;</a>\n'
         '    </span>`;\n'
         '  }).join(" ");\n'
         '  let det_rows = pa.stocks.map(s => {\n'
         '    const c = s.ret_netto>=0?"#00c897":"#ff4d6d";\n'
+        '    const isin = ISIN_MAP[s.ticker]||"";\n'
         '    return `<tr>\n'
-        '      <td><b>${s.ticker}</b></td>\n'
+        '      <td><b>${s.ticker}</b> <a href="https://finance.yahoo.com/chart/${s.ticker}" target="_blank" style="color:#58a6ff;font-size:1.1rem;font-weight:700;text-decoration:none;vertical-align:middle" title="Yahoo Finance">&#x2197;</a><br><span style="font-size:0.72rem;color:#adbac7">${isin}</span></td>\n'
         '      <td>${s.p_acq}</td><td>${s.p_oggi}</td>\n'
         '      <td style="color:${s.ret_lordo>=0?"#00c897":"#ff4d6d"}">${fmtPct(s.ret_lordo)}</td>\n'
         '      <td>${s.costo_eur.toFixed(2)} \\u20AC</td>\n'
@@ -1329,15 +1354,18 @@ def genera_html(risultati, stats, cap_labs, cap_vals, sp500_vals, drawdown_vals,
         '    const badges = m.stocks.map(s => {\n'
         '      const c = s.ret_netto>=0?"#00c897":"#ff4d6d";\n'
         '      const key = `${s.ticker}-${m.data.slice(0,7)}`;\n'
+        '      const isin = ISIN_MAP[s.ticker]||"";\n'
         '      return `<span class="tbadge" onclick="openTickerChart(\'${key}\')" style="border:1px solid ${c};cursor:pointer"\n'
-        '        title="${s.ticker}: acq ${s.p_acq} vnd ${s.p_vnd} | netto ${s.ret_netto>=0?"+":""}${s.ret_netto}% | mom ${s.mom_3m>=0?"+":""}${s.mom_3m}%">\n'
-        '        ${s.ticker} <span style="color:${c}">${s.ret_netto>=0?"+":""}${s.ret_netto}%</span>\n'
+        '        title="${s.ticker}: acq ${s.p_acq} vnd ${s.p_vnd} | netto ${s.ret_netto>=0?"+":""}${s.ret_netto}% | mom ${s.mom_3m>=0?"+":""}${s.mom_3m}% | ${isin}">\n'
+        '        ${s.ticker} <span style="color:${c}">${s.ret_netto>=0?"+":""}${s.ret_netto}%</span>'
+        '<a href="https://finance.yahoo.com/chart/${s.ticker}" target="_blank" onclick="event.stopPropagation()" style="color:#58a6ff;font-size:1.1rem;font-weight:700;text-decoration:none;margin-left:5px;vertical-align:middle" title="Yahoo Finance">&#x2197;</a>\n'
         '      </span>`;\n'
         '    }).join("");\n'
         '    const det_rows = m.stocks.map(s => {\n'
         '      const c = s.ret_netto>=0?"#00c897":"#ff4d6d";\n'
+        '      const isin = ISIN_MAP[s.ticker]||"";\n'
         '      return `<tr>\n'
-        '        <td><b>${s.ticker}</b></td>\n'
+        '        <td><b>${s.ticker}</b> <a href="https://finance.yahoo.com/chart/${s.ticker}" target="_blank" style="color:#58a6ff;font-size:1.1rem;font-weight:700;text-decoration:none;vertical-align:middle" title="Yahoo Finance">&#x2197;</a><br><span style="font-size:0.72rem;color:#adbac7">${isin}</span></td>\n'
         '        <td>${s.p_acq}</td><td>${s.p_vnd}</td>\n'
         '        <td style="color:${s.ret_lordo>=0?"#00c897":"#ff4d6d"}">${fmtPct(s.ret_lordo)}</td>\n'
         '        <td>${s.costo_eur.toFixed(2)} \\u20AC</td>\n'
@@ -1471,7 +1499,11 @@ def genera_html(risultati, stats, cap_labs, cap_vals, sp500_vals, drawdown_vals,
         'function openTickerChart(key) {\n'
         '  const tc = TICKER_CHARTS[key];\n'
         '  if (!tc) return;\n'
-        '  document.getElementById("modal-title").textContent = tc.ticker + "  \u2014  " + tc.month;\n'
+        '  const isinVal = ISIN_MAP[tc.ticker]||"";\n'
+        '  document.getElementById("modal-title").innerHTML =\n'
+        '    tc.ticker + "  \u2014  " + tc.month +\n'
+        '    ` <a href="https://finance.yahoo.com/chart/${tc.ticker}" target="_blank" style="font-size:1.2rem;font-weight:700;color:#58a6ff;text-decoration:none;margin-left:10px;vertical-align:middle" title="Yahoo Finance">&#x2197; YF</a>` +\n'
+        '    (isinVal ? ` <span style="font-size:0.75rem;color:#adbac7;margin-left:8px">${isinVal}</span>` : "");\n'
         '  // Trova indici con >= / <= per gestire giorni non di borsa\n'
         '  let entryIdx = tc.dates.findIndex(d => d >= tc.entry_date);\n'
         '  let exitIdx  = -1;\n'

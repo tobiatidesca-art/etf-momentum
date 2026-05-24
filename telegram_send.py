@@ -78,7 +78,8 @@ def build_testo(pa):
         icon = '🟢' if r >= 0 else '🔴'
         titoli_lines.append(
             f"  {icon} {t['ticker']}   {r:+.2f}%"
-            f"   ${t['prezzo_acquisto']:.2f} → ${t['prezzo_oggi']:.2f}"
+            f"   ${t['prezzo_acquisto']:.2f} → ${t['prezzo_oggi']:.2f}\n"
+            f"     📊 https://finance.yahoo.com/chart/{t['ticker']}"
         )
 
     return (
